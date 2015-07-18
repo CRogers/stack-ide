@@ -33,8 +33,6 @@ module Stack.Ide.JsonAPI (
   , AnnSourceError(..)
   , MsgAnn(..)
   , CodeVariety(..)
-  , AutocompletionSpan(..)
-  , AutocompletionInfo(..)
   , VersionInfo(..)
   , Identifier
   , Targets(..)
@@ -73,7 +71,7 @@ data Request =
   | RequestGetSpanInfo SourceSpan
   | RequestGetExpTypes SourceSpan
   | RequestGetAnnExpTypes SourceSpan
-  | RequestGetAutocompletion AutocompletionSpan
+  | RequestGetAutocompletion FilePath String
   -- Run
   | RequestRun Bool ModuleName Identifier
   | RequestProcessInput String
@@ -106,7 +104,7 @@ data Response =
   | ResponseGetSpanInfo [ResponseSpanInfo]
   | ResponseGetExpTypes [ResponseExpType]
   | ResponseGetAnnExpTypes [ResponseAnnExpType]
-  | ResponseGetAutocompletion [AutocompletionInfo]
+  | ResponseGetAutocompletion [IdInfo]
   -- Run
   | ResponseProcessOutput String
   | ResponseProcessDone RunResult
@@ -145,18 +143,6 @@ data AnnSourceError = AnnSourceError
   , annErrorSpan :: !EitherSpan
   , annErrorMsg :: !(Ann MsgAnn)
   }
-
-data AutocompletionSpan = AutocompletionSpan
-   { autocompletionFilePath :: FilePath
-   , autocompletionPrefix :: String
-   }
-
-data AutocompletionInfo = AutocompletionInfo
-   { autocompletionInfoDefinedIn :: Text
-   , autocompletionInfoName :: Text
-   , autocompletionQualifier :: Maybe Text
-   , autocompletionType :: Maybe Text
-   }
 
 data CodeVariety =
     ExpCode
@@ -198,8 +184,6 @@ sliceSpans ix txt ((fr, to, x) : xs) =
 $(deriveJSON defaultOptions ''AnnSourceError)
 $(deriveJSON defaultOptions ''MsgAnn)
 $(deriveJSON defaultOptions ''CodeVariety)
-$(deriveJSON defaultOptions ''AutocompletionInfo)
-$(deriveJSON defaultOptions ''AutocompletionSpan)
 $(deriveJSON defaultOptions ''RequestSessionUpdate)
 $(deriveJSON defaultOptions ''Progress)
 $(deriveJSON defaultOptions ''Targets)
